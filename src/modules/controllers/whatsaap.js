@@ -178,6 +178,8 @@ exports.sendMessage = async (req, res) => {
 };
 
 // Function to verify OTP
+
+
 exports.verifyOTP = async (req, res) => {
     const { otp } = req.body; // Only get OTP from request
 
@@ -210,7 +212,10 @@ exports.verifyOTP = async (req, res) => {
         user.verified = true; // Set verified to true
         await user.save(); // Save the changes to the database
 
-        // Return user details upon successful verification
+        // Generate a JWT token for the user
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }); // Set your expiration time
+
+        // Return user details upon successful verification along with the token
         return res.status(200).json({
             message: 'Phone number verified successfully!',
             user: {
@@ -219,14 +224,14 @@ exports.verifyOTP = async (req, res) => {
                 name: user.name,
                 role: user.role,
                 verified: user.verified // Return the updated verified status
-            }
+            },
+            token // Include the token in the response
         });
     } catch (error) {
         console.error('Error verifying OTP:', error);
         return res.status(500).json({ message: 'Error verifying OTP', details: error.message });
     }
 };
-
 
 
 exports.resendOTP = async (req, res) => {
@@ -402,7 +407,7 @@ exports.updateAddress = async (req, res) => {
                 }
             },
             { new: true } // To return the updated user
-        ).select('name _id number address latitude longitude role');
+        ).select('name _id number address latitude longitude role'); // Ensure latitude is included here
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -416,7 +421,7 @@ exports.updateAddress = async (req, res) => {
                 id: user._id,
                 number: user.number,
                 address: user.address,
-                latitude: user.latitude,
+                latitude: user.latitude, // Ensure latitude is included in the response
                 longitude: user.longitude,
                 role: user.role
             }
