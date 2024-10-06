@@ -293,3 +293,137 @@ exports.resendOTP = async (req, res) => {
         return res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
     }
 };
+exports.editProfile = async (req, res) => {
+    try {
+        // Extract the token from the header
+        const token = req.header('Authorization').replace('Bearer ', '');
+
+        if (!token) {
+            return res.status(401).json({ message: 'Authorization token required' });
+        }
+
+        // Verify the token
+        const decoded = jwt.verify(token, JWT_SECRET); // Use your JWT secret key
+        const userId = decoded.userId;
+
+        // Extract name and number from the request body
+        const { name, number } = req.body;
+
+        // Check if the new number is already taken by another user
+        const existingUser = await User.findOne({ number: number });
+
+        if (existingUser && existingUser._id.toString() !== userId) {
+            return res.status(400).json({ message: 'This phone number is already registered to another user.' });
+        }
+
+        // Find the user by ID and update their profile
+        const user = await User.findByIdAndUpdate(
+            userId, 
+            { name: name, number: number }, 
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Send a success response with the updated user data
+        res.status(200).json({ message: 'Profile updated successfully', user });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating profile', error: error.message });
+    }
+};
+
+exports.getProfile = async (req, res) => {
+    try {
+        // Extract token from Authorization header
+        const token = req.header('Authorization').replace('Bearer ', '');
+
+        if (!token) {
+            return res.status(401).json({ message: 'Authorization token required' });
+        }
+
+        // Verify the token
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.userId;
+
+        // Find the user by ID and select the fields accordingly
+        const user = await User.findById(userId).select('name _id number address role');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Ensure address always returns in the response
+        const address = user.address ? user.address : 'No address provided';
+
+        // Send a response with user details
+        return res.status(200).json({
+            name: user.name,
+            id: user._id,
+            number: user.number,
+            address: address,   // Ensuring address always exists
+            role: user.role
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving profile', error: error.message });
+    }
+};
+exports.updateAddress = async (req, res) => {
+    try {
+        // Extract token from Authorization header
+        const token = req.header('Authorization').replace('Bearer ', '');
+
+        if (!token) {
+            return res.status(401).json({ message: 'Authorization token required' });
+        }
+
+        // Verify the token
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userId = decoded.userId;
+
+        // Extract address, latitude, and longitude from request body
+        const { address, latitude, longitude } = req.body;
+
+        if (!address || !latitude || !longitude) {
+            return res.status(400).json({ message: 'Address, latitude, and longitude are required' });
+        }
+
+        // Update the user's address, latitude, and longitude
+        const user = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    address: address,
+                    latitude: latitude,
+                    longitude: longitude
+                }
+            },
+            { new: true } // To return the updated user
+        ).select('name _id number address latitude longitude role');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Send a response with the updated user details
+        return res.status(200).json({
+            message: 'Address updated successfully',
+            user: {
+                name: user.name,
+                id: user._id,
+                number: user.number,
+                address: user.address,
+                latitude: user.latitude,
+                longitude: user.longitude,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating address', error: error.message });
+    }
+};
+

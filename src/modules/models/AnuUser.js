@@ -25,6 +25,12 @@ const User = mongoose.models.AnuUser || mongoose.model('AnuUser2', new mongoose.
     otpExpires: {
         type: Date, // Expiration time for OTP
     },
+    lattitude: {
+        type: String, // Expiration time for OTP
+    },
+    longitude: {
+        type: String, // Expiration time for OTP
+    },
     verified: {
         type: Boolean,
         default: false,
