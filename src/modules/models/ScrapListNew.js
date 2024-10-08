@@ -15,7 +15,7 @@ const scrapSchema = new mongoose.Schema({
     name: { type: String, required: true },
     types: [typeSchema],
     isSelected: { type: Boolean, default: false },
+    image: { type: String, required: true }, // Add the image field here
 });
 
-
-module.exports = mongoose.model('ScrapListNew', scrapSchema);
+module.exports = mongoose.model('ScrapListNew1', scrapSchema);
