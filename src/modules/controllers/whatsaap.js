@@ -392,7 +392,7 @@ exports.updateAddress = async (req, res) => {
         // Extract address, latitude, and longitude from request body
         const { address, latitude, longitude } = req.body;
 
-        if (!address || !latitude || !longitude) {
+        if (!address ) {
             return res.status(400).json({ message: 'Address, latitude, and longitude are required' });
         }
 
