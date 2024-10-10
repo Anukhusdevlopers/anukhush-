@@ -15,8 +15,8 @@ const ScrapItemSchema = new mongoose.Schema({
   pickUpDate: { type: Date, required: true }, // New field for pickup date
   pickUpTime: { type: String, required: true }, // New field for pickup time as string
   location: { type: String, required: true },
-  latitude: { type: Number, required: true }, // New field for latitude
-  longitude: { type: Number, required: true } , // New field for longitude
+  latitude: { type: Number, }, // New field for latitude
+  longitude: { type: Number, } , // New field for longitude
   requestId: { type: String, required: true, unique: true }, // Ensure this is included
 
 });
