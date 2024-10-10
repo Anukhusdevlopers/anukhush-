@@ -362,13 +362,16 @@ exports.getProfile = async (req, res) => {
 
         // Ensure address always returns in the response
         const address = user.address ? user.address : 'No address provided';
-
+        const latitude = user.latitude ? user.latitude : 'No latitude provided';
+        const longitude = user.longitude ? user.longitude : 'No longitude provided';
         // Send a response with user details
         return res.status(200).json({
             name: user.name,
             id: user._id,
             number: user.number,
             address: address,   // Ensuring address always exists
+            latitude: latitude,         // Include latitude
+            longitude: longitude,       // Include longitude
             role: user.role
         });
 
