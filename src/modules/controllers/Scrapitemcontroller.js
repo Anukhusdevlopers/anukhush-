@@ -75,37 +75,42 @@ const createScrapItem = async (req, res) => {
 // Controller to fetch all scrap requests based on authToken and role
 // Fetch requests based on authToken from headers
 const getRequestsByAuthTokenAndRole = async (req, res) => {
-    try {
+  try {
       // Extract authToken from headers
       const authToken = req.headers.authorization?.split(" ")[1]; // Assumes 'Bearer YOUR_ACCESS_TOKEN' format
-  
+
       if (!authToken) {
-        return res.status(400).json({
-          message: 'Auth token must be provided in headers.',
-        });
+          return res.status(400).json({
+              message: 'Auth token must be provided in headers.',
+          });
       }
-  
-      // Fetch all scrap items associated with the authToken
-      const scrapRequests = await ScrapItem.find({ authToken });
-  
+
+      // Extract userId from the URL parameters
+      const { id } = req.params;
+
+      // Fetch all scrap items associated with the authToken and userId
+      const scrapRequests = await ScrapItem.find({ authToken, id }); // Modify the query to include userId
+
       if (scrapRequests.length === 0) {
-        return res.status(404).json({
-          message: 'No requests found for the provided auth token.',
-        });
+          return res.status(404).json({
+              message: 'No requests found for the provided auth token and user ID.',
+          });
       }
-  
+
       res.status(200).json({
-        message: 'Fetched all requests successfully.',
-        data: scrapRequests,
+          message: 'Fetched all requests successfully.',
+          data: scrapRequests,
       });
-    } catch (error) {
+  } catch (error) {
       console.error('Error fetching requests by auth token:', error);
       res.status(500).json({
-        message: 'Error fetching requests',
-        error: error.message,
+          message: 'Error fetching requests',
+          error: error.message,
       });
-    }
-  };
+  }
+};
+
+
   // Controller to fetch a single scrap request by request ID
   // Controller to fetch a single scrap request by request ID
   const getRequestById = async (req, res) => {

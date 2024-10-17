@@ -7,7 +7,7 @@ const authentokication =require("../middleware/authMiddleware")
 // POST API endpoint
 router.post('/createscraplist',  upload.single('image'), createScrapItem);
 
-router.get('/request-all', getRequestsByAuthTokenAndRole);
+router.get('/request-all//:userId', getRequestsByAuthTokenAndRole);
 router.get('/scrap-items/:requestId', getRequestById); // Define the new route
 
 router.get('/your-protected-route', authentokication, (req, res) => {
