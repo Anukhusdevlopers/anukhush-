@@ -13,6 +13,7 @@ const createScrapItem = async (req, res) => {
     if (!authToken) {
       return res.status(401).json({ message: "Authorization token is required." });
     }
+
     const { scrapItems, name, pickUpDate, pickUpTime, location, latitude, longitude } = req.body;
 
     let parsedScrapItems;
@@ -22,9 +23,23 @@ const createScrapItem = async (req, res) => {
       return res.status(400).json({ message: "Invalid scrapItems format", error: err.message });
     }
 
-    // Create a new ScrapItem instance with a unique requestId
+    // Get the current date in DDMMYY format
+    const currentDate = new Date();
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+    const year = String(currentDate.getFullYear()).slice(-2); // Get last two digits of the year
+
+    // Generate a unique numeric request number
+    const existingScrapItems = await ScrapItem.find({});
+    const requestNumber = existingScrapItems.length + 1; // Simple incrementing number
+
+    // Construct the requestId
+    const requestId = `${day}${month}${year}${requestNumber}`;
+
+    // Create a new ScrapItem instance with the generated requestId
     const newScrapItem = new ScrapItem({
-      authToken,
+      authToken: authToken, // Setting the authToken from the header
+
       scrapItems: parsedScrapItems,
       name,
       image: req.file ? req.file.path : null,
@@ -33,7 +48,7 @@ const createScrapItem = async (req, res) => {
       location,
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
-      requestId: uuidv4() // Set the requestId to a unique UUID
+      requestId: requestId // Set the requestId to the formatted string
     });
 
     // Save the new scrap item to the database
@@ -43,7 +58,7 @@ const createScrapItem = async (req, res) => {
     res.status(200).json({
       status: 200,
       data: {
-        requestId: newScrapItem.requestId, // Use the generated UUID
+        requestId: newScrapItem.requestId, // Use the generated requestId
       },
       message: 'Request created successfully',
     });
@@ -55,6 +70,7 @@ const createScrapItem = async (req, res) => {
     });
   }
 };
+
 
 // Controller to fetch all scrap requests based on authToken and role
 // Fetch requests based on authToken from headers

@@ -10,8 +10,12 @@ const ScrapItemSchema = new mongoose.Schema({
       weight: { type: Number, required: true }
     }
   ],
+
+
+
   name: { type: String, required: true },
   image: { type: String },
+  formimage: { type: String },//add on delivery boy manuaaly added this image 
   pickUpDate: { type: Date, required: true }, // New field for pickup date
   pickUpTime: { type: String, required: true }, // New field for pickup time as string
   location: { type: String, required: true },
